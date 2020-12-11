@@ -944,7 +944,7 @@ class Dialog(VerticalLayout):
 		The display is destroyed when this function exits.
 		"""
 		self.initialize_display()
-		self.main_loop()
+		self._main_loop()
 		display.quit()
 
 
@@ -969,7 +969,7 @@ class Dialog(VerticalLayout):
 		display.update()
 
 
-	def main_loop(self):
+	def _main_loop(self):
 		"""
 		pygame event loop - respond to pygame events and call handlers for those events.
 		"""
@@ -1010,7 +1010,7 @@ class Dialog(VerticalLayout):
 
 	def loop_start(self):
 		"""
-		Called at the beginning of main_loop() each time through, before processing events.
+		Called at the beginning of _main_loop() each time through, before processing events.
 		The event loop looks like this:
 		1. loop_start()                              <-- you are here
 		2. event handling (keyboard, mouse, timers)
@@ -1025,7 +1025,7 @@ class Dialog(VerticalLayout):
 
 	def loop_end(self):
 		"""
-		Called at the end of main_loop() each time through.
+		Called at the end of _main_loop() each time through.
 		The event loop looks like this:
 		1. loop_start()
 		2. event handling (keyboard, mouse, timers)
@@ -1040,7 +1040,7 @@ class Dialog(VerticalLayout):
 
 	def _keydown(self, event):
 		"""
-		Handle KEYDOWN event - called from main_loop.
+		Handle KEYDOWN event - called from _main_loop.
 		"""
 		if event.mod & KMOD_ALT:
 			pass
@@ -1070,7 +1070,7 @@ class Dialog(VerticalLayout):
 
 	def _mousemotion(self, event):
 		"""
-		Handle MOUSEMOTION event - called from main_loop.
+		Handle MOUSEMOTION event - called from _main_loop.
 		"""
 		widget = self.widget_at(event.pos)
 		if widget is not self.hovered_widget:
@@ -1085,7 +1085,7 @@ class Dialog(VerticalLayout):
 
 	def _mousebuttondown(self, event):
 		"""
-		Handle MOUSEBUTTONDOWN event - called from main_loop.
+		Handle MOUSEBUTTONDOWN event - called from _main_loop.
 		"""
 		self.mouse_down_widget = self.widget_at(event.pos)
 		if self.focused_widget is not None and self.focused_widget is not self.mouse_down_widget:
@@ -1094,7 +1094,7 @@ class Dialog(VerticalLayout):
 
 	def _mousebuttonup(self, event):
 		"""
-		Handle MOUSEBUTTONUP event - called from main_loop.
+		Handle MOUSEBUTTONUP event - called from _main_loop.
 		"""
 		widget = self.widget_at(event.pos)
 		if widget is not None and widget is self.mouse_down_widget and not widget.disabled:
@@ -1105,7 +1105,7 @@ class Dialog(VerticalLayout):
 
 	def _quit(self, event):
 		"""
-		Handle QUIT event or K_ESCAPE key pressed - called from main_loop.
+		Handle QUIT event or K_ESCAPE key pressed - called from _main_loop.
 		"""
 		self.close()
 
@@ -1119,7 +1119,7 @@ class Dialog(VerticalLayout):
 
 	def close(self):
 		"""
-		Flags to exit the main loop. (thread safe). The main_loop function will fall through
+		Flags to exit the main loop. (thread safe). The _main_loop function will fall through
 		after this is called.
 		"""
 		self.__run_loop = False
