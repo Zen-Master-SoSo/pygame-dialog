@@ -127,4 +127,24 @@ All the widgets provide the following functions, which are called from the Dialo
 |	mouse_out		| Called when the mouse leaves the area of the Widget, (not including its margin) |
 |	click			| Called when the mouse button went down, and then up, within the area of the Widget, (not including its margin) |
 
+# Screenshots:
+
+Here's some screenshots, and the commands used to create them:
+
+	$ python3 pygame-dialog.py
+
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/dialog.png?raw=true)
+
+	$ python3 pygame-dialog.py -r
+
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/roundies.png?raw=true)
+
+	$ python3 pygame-dialog.py -g
+
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/grid.png?raw=true)
+
+	$ python3 pygame-dialog.py -gr
+
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/grid-roundies.png?raw=true)
+
 
