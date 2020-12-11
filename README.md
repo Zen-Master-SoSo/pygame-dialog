@@ -1,4 +1,4 @@
-# pygame-dialog
+# pygame_dialog
 
 Provides classes for making user interface dialogs with pygame, including
 GridLayout, HorizontalLayout, VerticalLayout, Label, Button, Textbox, and Dialog.
@@ -131,20 +131,20 @@ All the widgets provide the following functions, which are called from the Dialo
 
 Here's some screenshots, and the commands used to create them:
 
-	$ python3 pygame-dialog.py
+	$ python3 pygame_dialog.py
 
-![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/dialog.png?raw=true)
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/dialog.png?raw=true)
 
-	$ python3 pygame-dialog.py -r
+	$ python3 pygame_dialog.py -r
 
-![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/roundies.png?raw=true)
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/roundies.png?raw=true)
 
-	$ python3 pygame-dialog.py -g
+	$ python3 pygame_dialog.py -g
 
-![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/grid.png?raw=true)
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/grid.png?raw=true)
 
-	$ python3 pygame-dialog.py -gr
+	$ python3 pygame_dialog.py -gr
 
-![basic dialog](https://github.com/Zen-Master-SoSo/pygame-dialog/blob/main/screenshots/grid-roundies.png?raw=true)
+![basic dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/grid-roundies.png?raw=true)
 
 
