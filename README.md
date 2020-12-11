@@ -137,14 +137,14 @@ Here's some screenshots, and the commands used to create them:
 
 	$ python3 pygame_dialog.py -r
 
-![basic dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/roundies.png?raw=true)
+![basic dialog with rounded Widgets](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/roundies.png?raw=true)
 
 	$ python3 pygame_dialog.py -g
 
-![basic dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/grid.png?raw=true)
+![grid dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/grid.png?raw=true)
 
 	$ python3 pygame_dialog.py -gr
 
-![basic dialog](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/grid-roundies.png?raw=true)
+![grid dialog with rounded Widgets](https://github.com/Zen-Master-SoSo/pygame_dialog/blob/main/screenshots/grid-roundies.png?raw=true)
 
 
