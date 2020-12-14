@@ -1128,13 +1128,13 @@ class Dialog(VerticalLayout):
 
 
 if __name__ == '__main__':
-	import sys, time, optparse
+	import sys, time, argparse
 
-	p = optparse.OptionParser()
-	p.add_option('--dump', '-d', action='store_true')
-	p.add_option('--grid', '-g', action='store_true')
-	p.add_option('--roundies', '-r', action='store_true')
-	options, arguments = p.parse_args()
+	p = argparse.ArgumentParser()
+	p.add_argument("--dump", "-d", action="store_true", help="Dump description of dialog structure")
+	p.add_argument("--grid", "-g", action="store_true", help="Show test dialog with grid layout")
+	p.add_argument("--roundies", "-r", action="store_true", help="Decorate widgets with rounded corners")
+	options = p.parse_args()
 
 	pygame.font.init()
 
