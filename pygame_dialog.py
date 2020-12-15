@@ -1153,7 +1153,7 @@ class Dialog(VerticalLayout):
 		"""
 		pygame.font.init()
 		VerticalLayout.__init__(self, *args)
-		self.__run_loop = True
+		self._run_loop = True
 		self.__hovered_widget = None
 		self.__focused_widget = None
 
@@ -1229,7 +1229,7 @@ class Dialog(VerticalLayout):
 			VIDEORESIZE:		self._noop,				# 16
 			VIDEOEXPOSE:		self._noop,				# 17
 		}
-		while self.__run_loop:
+		while self._run_loop:
 			self.loop_start()
 			for event in pygame.event.get(): event_handlers[event.type](event)
 			self.loop_end()
@@ -1360,7 +1360,7 @@ class Dialog(VerticalLayout):
 		Flags to exit the main loop. (thread safe). The _main_loop function will fall
 		through to "exit_loop()" after this is called.
 		"""
-		self.__run_loop = False
+		self._run_loop = False
 
 
 	def dump(self, indent=0):
