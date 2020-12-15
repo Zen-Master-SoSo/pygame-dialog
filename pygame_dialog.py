@@ -24,35 +24,34 @@ NO_POSITION		= (-1, -1)
 
 class Layout:
 	"""
-	Abstract base class of HorizontalLayout, VerticalLayout, and GridLayout.
+	Base class of HorizontalLayout, VerticalLayout, and GridLayout.
 	"""
 
 	def get_initial_rect(self):
 		"""
-		Sets this layout's rect to a height and width large enough for all of its contained elements.
-		Returns Rect.
+		Determine the minimum space necessary for this element and its' contained elements.
+		Returns Rect
 		"""
 		pass
 
 
-	def grow_rects(self):
+	def justify_elements(self):
 		"""
-		Expand the contained elements' height and/or width to fit the space available to them.
+		Expand the area allowed to each element so that they fill available space.
 		"""
 		pass
 
 
 	def position_rects(self):
 		"""
-		Set the final top, left position of the elements (widget or layout) contained in this layout.
-		Each element's position is set relative to the screen.
+		Set the final top, left position of contained elements.
 		"""
 		pass
 
 
 	def widgets(self):
 		"""
-		A generator which iterates over all of the Widget instances contained in this Layout.
+		A generator function which yields all the Widget instances contained in this Layout.
 		"""
 		pass
 
@@ -65,11 +64,16 @@ class Layout:
 
 
 	def focusable_widgets(self):
+		"""
+		Returns a list of widgets contained in this layout which may receieve the focus.
+		"""
 		return filter(lambda elem: not isinstance(elem, Label) and not elem.disabled, self.widgets())
 
 
 	def focusable_widget_before(self, widget):
-		"""Returns the Widget preceeding widget, irrespective of container"""
+		"""
+		Returns the Widget preceeding widget, irrespective of container.
+		"""
 		prev = None
 		for e in self.focusable_widgets():
 			if e is widget:
@@ -79,7 +83,9 @@ class Layout:
 
 
 	def focusable_widget_after(self, widget):
-		"""Returns the Widget following widget, irrespective of container"""
+		"""
+		Returns the Widget following widget, irrespective of container.
+		"""
 		elem_found = False
 		for e in self.focusable_widgets():
 			if elem_found:
@@ -90,15 +96,17 @@ class Layout:
 
 
 	def first_focusable_widget(self):
-		"""Returns the first Widget, irrespective of container"""
-		for e in self.focusable_widgets():
-			return e
+		"""
+		Returns the first Widget, irrespective of container.
+		"""
+		for e in self.focusable_widgets(): return e
 
 
 	def last_focusable_widget(self):
-		"""Returns the last Widget, irrespective of container"""
-		for e in self.focusable_widgets():
-			pass
+		"""
+		Returns the last Widget, irrespective of container.
+		"""
+		for e in self.focusable_widgets(): pass
 		return e
 
 
@@ -111,7 +119,6 @@ class Layout:
 
 
 class GridLayout(Layout):
-
 	"""
 	A container for other elements, including layouts and widgets, which arranges them in a grid.
 	"""
@@ -123,11 +130,19 @@ class GridLayout(Layout):
 
 
 	def append(self, arg):
+		"""
+		Add a row to this GridLayout.
+		Accepts a list of elements (Widget or Layout). Returns this GridLayout.
+		"""
 		if type(arg) != list: raise Exception("GridLayout takes only lists as arguments")
 		self.rows.append(arg)
+		return self
 
 
 	def __getattr__(self, varname):
+		"""
+		Retrieve margin values of this Layout from its contained elements.
+		"""
 		if varname == "margin_top":
 			return self.row_margins[0]
 		elif varname == "margin_right":
@@ -139,6 +154,10 @@ class GridLayout(Layout):
 
 
 	def get_initial_rect(self):
+		"""
+		Determine the minimum space necessary for this element and its' contained elements.
+		Returns Rect
+		"""
 		self.row_count = len(self.rows)
 		self.column_count = 0
 		for row in self.rows: self.column_count = max(self.column_count, len(row))
@@ -180,17 +199,23 @@ class GridLayout(Layout):
 		return self.rect
 
 
-	def grow_rects(self):
+	def justify_elements(self):
+		"""
+		Expand the area allowed to each element so that they fill available space.
+		"""
 		for r in range(self.row_count):
 			for c in range(self.column_count):
 				if c == len(self.rows[r]): continue
 				self.rows[r][c].rect.width = self.column_widths[c]
 				self.rows[r][c].rect.height = self.row_heights[r]
 				if isinstance(self.rows[r][c], Layout):
-					self.rows[r][c].grow_rects()
+					self.rows[r][c].justify_elements()
 
 
 	def position_rects(self):
+		"""
+		Set the final top, left position of contained elements.
+		"""
 		tops = [self.rect.top for i in range(self.row_count)]
 		lefts = [self.rect.left for i in range(self.column_count)]
 		for r in range(1, self.row_count):
@@ -207,6 +232,9 @@ class GridLayout(Layout):
 
 
 	def widgets(self):
+		"""
+		A generator function which yields all the Widget instances contained in this Layout.
+		"""
 		for row in self.rows:
 			for cell in row:
 				if isinstance(cell, Layout):
@@ -217,6 +245,9 @@ class GridLayout(Layout):
 
 
 	def widget_at(self, pos):
+		"""
+		Returns the Widget at the given screen position (which is usually the mouse position).
+		"""
 		for row in self.rows:
 			for cell in row:
 				if cell.rect.collidepoint(pos):
@@ -225,6 +256,9 @@ class GridLayout(Layout):
 
 
 	def dump(self, indent=0):
+		"""
+		Print this layout's element tree for debugging.
+		"""
 		print('  ' * indent + self.__str__())
 		for row in self.rows:
 			print('  ' * (indent + 1) + "row:")
@@ -247,10 +281,18 @@ class LinearLayout(Layout):
 
 
 	def append(self, arg):
+		"""
+		Add a Widget or Layout to this LinearLayout.
+		Returns this LinearLayout.
+		"""
 		self.elements.append(arg)
+		return self
 
 
 	def position_rects(self):
+		"""
+		Set the final top, left position of contained elements.
+		"""
 		prev_elem = self.elements[0]
 		prev_elem.rect.top = self.rect.top
 		prev_elem.rect.left = self.rect.left
@@ -263,6 +305,9 @@ class LinearLayout(Layout):
 
 
 	def widgets(self):
+		"""
+		A generator function which yields all the Widget instances contained in this Layout.
+		"""
 		for elem_a in self.elements:
 			if isinstance(elem_a, Layout):
 				for elem_b in elem_a.widgets():
@@ -272,6 +317,9 @@ class LinearLayout(Layout):
 
 
 	def widget_at(self, pos):
+		"""
+		Returns the Widget at the given screen position (which is usually the mouse position).
+		"""
 		for element in self.elements:
 			if element.rect.collidepoint(pos):
 				return element if isinstance(element, Widget) else element.widget_at(pos)
@@ -279,6 +327,9 @@ class LinearLayout(Layout):
 
 
 	def dump(self, indent=0):
+		"""
+		Print this layout's element tree for debugging.
+		"""
 		print('  ' * indent + self.__str__())
 		for element in self.elements: element.dump(indent + 1)
 
@@ -288,6 +339,10 @@ class HorizontalLayout(LinearLayout):
 
 
 	def get_initial_rect(self):
+		"""
+		Determine the minimum space necessary for this element and its' contained elements.
+		Returns Rect
+		"""
 		if len(self.elements) == 0:
 			raise Exception("Layout contains no elements")
 		self.rect = Rect((0, 0), self.elements[0].get_initial_rect().size)
@@ -302,24 +357,32 @@ class HorizontalLayout(LinearLayout):
 		return self.rect
 
 
-	def grow_rects(self):
+	def justify_elements(self):
+		"""
+		Expand the area allowed to each element so that they fill available space.
+		"""
 		content_width = sum(element.rect.width for element in self.elements)
 		target_content_width = self.rect.width - self.__internal_margins
 		grow_factor = float(target_content_width) / float(content_width)
 		for element in self.elements:
 			element.rect.height = self.rect.height
 			element.rect.width = round(element.rect.width * grow_factor)
-			if isinstance(element, Layout): element.grow_rects()
+			if isinstance(element, Layout): element.justify_elements()
 
 
 	def position_next_element(self, prev_element, next_elem):
-		"""Shift next_elem's rect by the width of prev_element's rect, plus margin"""
+		"""
+		Shift next_elem's rect by the width of prev_element's rect, plus margin.
+		"""
 		next_elem.rect.top = prev_element.rect.top
 		next_elem.rect.left = prev_element.rect.left + prev_element.rect.width + \
 			max(prev_element.margin_right, next_elem.margin_left)
 
 
 	def __getattr__(self, varname):
+		"""
+		Retrieve margin values of this Layout from its contained elements.
+		"""
 		if varname == "margin_top":
 			return max(elem.margin_top for elem in self.elements)
 		elif varname == "margin_right":
@@ -335,6 +398,10 @@ class VerticalLayout(LinearLayout):
 
 
 	def get_initial_rect(self):
+		"""
+		Determine the minimum space necessary for this element and its' contained elements.
+		Returns Rect
+		"""
 		if len(self.elements) == 0:
 			raise Exception("Layout contains no elements")
 		self.rect = Rect((0, 0), self.elements[0].get_initial_rect().size)
@@ -349,24 +416,32 @@ class VerticalLayout(LinearLayout):
 		return self.rect
 
 
-	def grow_rects(self):
+	def justify_elements(self):
+		"""
+		Expand the area allowed to each element so that they fill available space.
+		"""
 		content_height = sum(element.rect.height for element in self.elements)
 		target_content_height = self.rect.height - self.__internal_margins
 		grow_factor = float(target_content_height) / float(content_height)
 		for element in self.elements:
 			element.rect.width = self.rect.width
 			element.rect.height = round(element.rect.height * grow_factor)
-			if isinstance(element, Layout): element.grow_rects()
+			if isinstance(element, Layout): element.justify_elements()
 
 
 	def position_next_element(self, prev_element, next_elem):
-		"""Shift next_elem's rect by the height of prev_element's rect, plus margin"""
+		"""
+		Shift next_elem's rect by the height of prev_element's rect, plus margin.
+		"""
 		next_elem.rect.top = prev_element.rect.top + prev_element.rect.height + \
 			max(prev_element.margin_bottom, next_elem.margin_top)
 		next_elem.rect.left = prev_element.rect.left
 
 
 	def __getattr__(self, varname):
+		"""
+		Retrieve margin values of this Layout from its contained elements.
+		"""
 		if varname == "margin_top":
 			return self.elements[0].margin_top
 		elif varname == "margin_right":
@@ -418,8 +493,6 @@ class Widget:
 
 	def __setattr__(self, varname, value):
 		"""
-		Sets "dirty" on this Widget when values change.
-		Allows for setting the rendering effect using a function name.
 		Allows for setting margins or padding using tuples or single integers.
 		----------------------------------------------------------------------
 			Set all margins to 10px:
@@ -430,6 +503,8 @@ class Widget:
 				widget.margin = (5, 10, 20, 10)
 				order is (top, right, bottom, left)
 		----------------------------------------------------------------------
+		Allows for setting the rendering effect using a function name.
+		Sets "dirty" on a Widget its visual appearance changes.
 		"""
 		if varname == "margin" and isinstance(value, tuple):
 			if(len(value)) == 2:
@@ -467,6 +542,9 @@ class Widget:
 
 
 	def __getattr__(self, varname):
+		"""
+		Returns value of "margin" if "margin_<side>" is not set. Same for padding.
+		"""
 		if varname == "margin_top" or varname == "margin_right" or \
 			varname == "margin_bottom" or varname == "margin_left":
 			return self.margin
@@ -644,6 +722,10 @@ class TextWidget(Widget):
 
 
 	def get_initial_rect(self):
+		"""
+		Determine the minimum space necessary for this element and its' contained elements.
+		Returns Rect
+		"""
 		self.font = pygame.font.SysFont(self.font, self.font_size)
 		if self.height is None or self.width is None:
 			w, h = self.font.size(self.text)
@@ -677,6 +759,9 @@ class TextWidget(Widget):
 
 
 	def dump(self, indent=0):
+		"""
+		Print this widget's __str__(), formatted for debugging.
+		"""
 		print('  ' * indent + self.__str__())
 
 
@@ -711,8 +796,10 @@ class Button(TextWidget):
 
 
 	def click(self, pos):
-		if callable(self.click_handler):
-			self.click_handler(self)
+		"""
+		Click pseudo-event.
+		"""
+		if callable(self.click_handler): self.click_handler(self)
 
 
 
@@ -841,7 +928,8 @@ class Textbox(TextWidget):
 
 	def previous_word_boundary(self, pos):
 		"""
-		Returns a cursor position (intger) marking the space previous to the given position.
+		Returns a cursor position (intger) marking the space previous to the given
+		position.
 		"""
 		while pos and self.text[pos - 1].isspace(): pos -= 1
 		word_boundary = self.text.rfind(' ', 0, pos)
@@ -850,7 +938,8 @@ class Textbox(TextWidget):
 
 	def next_word_boundary(self, pos):
 		"""
-		Returns a cursor position (intger) marking the space following the given position.
+		Returns a cursor position (intger) marking the space following the given
+		position.
 		"""
 		text_len = len(self.text);
 		while pos < text_len and self.text[pos].isspace():
@@ -861,14 +950,16 @@ class Textbox(TextWidget):
 
 	def click(self, pos):
 		"""
-		Sets the cursor at the character position detected from the given (probably mouse) position.
+		Sets the cursor at the character position detected from the given (probably
+		mouse) position.
 		"""
 		self.cursor_position = self.cursor_at(pos[0])
 
 
 	def get_surface(self):
 		"""
-		Returns a Surface with this Textbox element's text and cursor indicator rendered onto it.
+		Returns a Surface with this Textbox element's text and cursor indicator
+		rendered onto it.
 		"""
 		surface = TextWidget.get_surface(self)	# Already includes text
 		if self.focused:
@@ -910,9 +1001,6 @@ class Dialog(VerticalLayout):
 
 	caption				= ""
 	background_color	= (220, 220, 220)
-	__run_loop			= False
-	hovered_widget		= None
-	focused_widget		= None
 
 
 	def __init__(self, *args):
@@ -921,6 +1009,9 @@ class Dialog(VerticalLayout):
 		"""
 		pygame.font.init()
 		VerticalLayout.__init__(self, *args)
+		self.__run_loop = True
+		self.__hovered_widget = None
+		self.__focused_widget = None
 
 
 	def set_caption(self, caption):
@@ -932,6 +1023,10 @@ class Dialog(VerticalLayout):
 
 
 	def get_initial_rect(self):
+		"""
+		Determine the minimum space necessary for this element and its' contained elements.
+		Returns Rect
+		"""
 		VerticalLayout.get_initial_rect(self)
 		self.rect.left = self.margin_left
 		self.rect.top = self.margin_top
@@ -962,7 +1057,7 @@ class Dialog(VerticalLayout):
 		self.screen = display.set_mode(self.screen_rect.size)
 		self.screen.fill(self.background_color)
 		display.set_caption(self.caption)
-		self.grow_rects()
+		self.justify_elements()
 		self.position_rects()
 		for widget in self.widgets():
 			self.screen.blit(widget.get_surface(), widget.rect)
@@ -990,7 +1085,6 @@ class Dialog(VerticalLayout):
 			VIDEORESIZE:		self._noop,				# 16
 			VIDEOEXPOSE:		self._noop,				# 17
 		}
-		self.__run_loop = True
 		while self.__run_loop:
 			self.loop_start()
 			for event in pygame.event.get(): event_handlers[event.type](event)
@@ -1046,26 +1140,26 @@ class Dialog(VerticalLayout):
 			pass
 		elif event.key == K_ESCAPE:
 			self._quit(event)
-		elif event.key == K_RETURN and self.focused_widget is not None:
-			self.focused_widget.click(NO_POSITION)
+		elif (event.key == K_RETURN or event.key == K_SPACE) and self.__focused_widget is not None:
+			self.__focused_widget.click(NO_POSITION)
 		elif event.key == K_TAB:
-			if self.focused_widget is None:
-				self.focused_widget = self.last_focusable_widget() \
+			if self.__focused_widget is None:
+				self.__focused_widget = self.last_focusable_widget() \
 					if event.mod & KMOD_SHIFT \
 					else self.first_focusable_widget()
 			else:
-				neighbor = self.focusable_widget_before(self.focused_widget) \
+				neighbor = self.focusable_widget_before(self.__focused_widget) \
 					if event.mod & KMOD_SHIFT \
-					else self.focusable_widget_after(self.focused_widget)
+					else self.focusable_widget_after(self.__focused_widget)
 				if neighbor is None:
 					neighbor = self.last_focusable_widget() \
 						if event.mod & KMOD_SHIFT \
 						else self.first_focusable_widget()
-				self.focused_widget.focused = False
-				self.focused_widget = neighbor
-			self.focused_widget.focused = True
-		elif self.focused_widget is not None and not self.focused_widget.disabled:
-			self.focused_widget.key_down(event)
+				self.__focused_widget.focused = False
+				self.__focused_widget = neighbor
+			self.__focused_widget.focused = True
+		elif self.__focused_widget is not None and not self.__focused_widget.disabled:
+			self.__focused_widget.key_down(event)
 
 
 	def _mousemotion(self, event):
@@ -1073,14 +1167,14 @@ class Dialog(VerticalLayout):
 		Handle MOUSEMOTION event - called from _main_loop.
 		"""
 		widget = self.widget_at(event.pos)
-		if widget is not self.hovered_widget:
-			if isinstance(self.hovered_widget, Widget):
-				self.hovered_widget.hovering = False
-				self.hovered_widget.mouse_out()
+		if widget is not self.__hovered_widget:
+			if isinstance(self.__hovered_widget, Widget):
+				self.__hovered_widget.hovering = False
+				self.__hovered_widget.mouse_out()
 			if widget is not None:
 				widget.hovering = True
 				widget.mouse_in()
-		self.hovered_widget = widget
+		self.__hovered_widget = widget
 
 
 	def _mousebuttondown(self, event):
@@ -1088,8 +1182,8 @@ class Dialog(VerticalLayout):
 		Handle MOUSEBUTTONDOWN event - called from _main_loop.
 		"""
 		self.mouse_down_widget = self.widget_at(event.pos)
-		if self.focused_widget is not None and self.focused_widget is not self.mouse_down_widget:
-			self.focused_widget.focused = False
+		if self.__focused_widget is not None and self.__focused_widget is not self.mouse_down_widget:
+			self.__focused_widget.focused = False
 
 
 	def _mousebuttonup(self, event):
@@ -1100,7 +1194,7 @@ class Dialog(VerticalLayout):
 		if widget is not None and widget is self.mouse_down_widget and not widget.disabled:
 			widget.focused = True
 			widget.click(event.pos)
-			self.focused_widget = widget
+			self.__focused_widget = widget
 
 
 	def _quit(self, event):
@@ -1119,8 +1213,8 @@ class Dialog(VerticalLayout):
 
 	def close(self):
 		"""
-		Flags to exit the main loop. (thread safe). The _main_loop function will fall through
-		after this is called.
+		Flags to exit the main loop. (thread safe). The _main_loop function will fall
+		through to "exit_loop()" after this is called.
 		"""
 		self.__run_loop = False
 
@@ -1184,7 +1278,7 @@ if __name__ == '__main__':
 		dialog.dump()
 		print
 
-		dialog.grow_rects()
+		dialog.justify_elements()
 		print("after growing rects to fit available space:")
 		dialog.dump()
 		print
