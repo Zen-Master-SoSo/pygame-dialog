@@ -1027,6 +1027,18 @@ class Radio(Widget):
 		self._label = Label(text, **kwargs)
 
 
+	@classmethod
+	def selected_element(cls, group):
+		"""
+		Returns the Radio instance with the given "group" id which is selected.
+		Returns none if none are selected.
+		"""
+		if group in Radio._groups:
+			for radio in Radio._groups[group]:
+				if radio.selected: return radio
+		return None
+
+
 	def __getattr__(self, varname):
 		if varname == "text":
 			return self._label.text
@@ -1328,6 +1340,8 @@ if __name__ == '__main__':
 
 	def click_handler(elem):
 		print(elem.__str__())
+		if isinstance(elem, Radio):
+			print("Selected: %s" % Radio.selected_element(elem.group))
 
 	status_label = Label("Status label", font_size=22)
 

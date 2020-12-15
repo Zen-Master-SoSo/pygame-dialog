@@ -1,9 +1,12 @@
 # pygame_dialog
 
 Provides classes for making user interface dialogs with pygame, including
-GridLayout, HorizontalLayout, VerticalLayout, Label, Button, Textbox, and Dialog.
+GridLayout, HorizontalLayout, VerticalLayout, Label, Button, Textbox, Radio,
+and Dialog.
 
-As of this initial commmit, this code can only produce standalone dialogs. It would be nice to be able to create a dialog which can "dock" to part of the pygame display. (For future development!)
+As of this initial commmit, this code can only produce standalone dialogs. It
+would be nice to be able to create a dialog which can "dock" to part of the
+pygame display. (For future development!)
 
 You can generate a dialog by passing the definition to the Dialog constructor:
 
@@ -63,9 +66,9 @@ When creating a Dialog, you can define Layouts which contain Layouts, like so:
 
 ## Widgets
 
-The available widgets include Label, Button, and Textbox. I suppose that's
-kinda minimal, but expanding on this should be pretty easy. Anyone want to give
-it a shot?
+The available widgets include Label, Button, Textbox, and Radio. That's kinda
+minimal, but expanding it is pretty easy. Anyone care to give it a shot, go for
+it.
 
 All the widgets have a default visual appearance, which is an inset "bevel"
 effect for a Textbox, and an outset bevel effect with a wider margin for a
@@ -94,7 +97,14 @@ contained elements, and detect when the mouse goes down and back up over the
 Button element, triggering the callback function provided to the Button
 constructor.
 
-What else do you need?
+### Radio
+
+Typical Radio button class. You pass a "group" id to the constructor, and the
+"selected" attribute of all the Radio instances with that same group are
+mutually exclusive. Generates "click events" just like a button, so you can
+modify other parts of the dialog when selection changes. You can also query
+which Radio in a group is selected using the "Radio.selected_element" class
+method.
 
 
 ### Widget attributes:
