@@ -5,20 +5,25 @@ Button, Textbox, and Dialog
 """
 
 import pygame, os
+from math import pi
 from pygame import Rect, Color, Surface, display
-from pygame.draw import polygon, circle, line
+from pygame.math import Vector2 as Vector
+from pygame.draw import polygon, circle, line, arc
 from pygame.locals import *
 
 
-ALIGN_CENTER	= 0
-ALIGN_LEFT		= 1
-ALIGN_RIGHT		= 2
+ALIGN_CENTER		= 0
+ALIGN_LEFT			= 1
+ALIGN_RIGHT			= 2
 
-STATE_NORMAL	= 0
-STATE_HOVER		= 1
-STATE_FOCUS		= 2
+STATE_NORMAL		= 0
+STATE_HOVER			= 1
+STATE_FOCUS			= 2
 
-NO_POSITION		= (-1, -1)
+NO_POSITION			= (-1, -1)
+
+RADIANS_BOTTOM_LEFT	= pi * 0.25
+RADIANS_TOPRIGHT	= pi * 1.25
 
 
 
@@ -613,7 +618,7 @@ class Widget:
 		"""
 		color_tuple = self.current_background_color()
 		surface.fill(color_tuple)
-		color = Color(color_tuple[0], color_tuple[1], color_tuple[2])
+		color = Color(*color_tuple)
 		highlight = color.correct_gamma(2) if inner else color.correct_gamma(0.75)
 		shadow = color.correct_gamma(0.5) if inner else color.correct_gamma(1.5)
 		bd = self.bevel_depth
@@ -996,6 +1001,95 @@ class Textbox(TextWidget):
 
 
 
+class Radio(Widget):
+
+	selected		= False
+	diameter		= 30				# Outside diameter of the radio circle
+	dot_color		= (160, 160, 160)	# Color of the inner circle rendered when selected
+	dot_radius		= 8					# Radius of the inner circle rendered when selected
+
+	_groups			= {}				# Class variable; lists of radio widgets
+
+
+	def __init__(self, group, text, **kwargs):
+		"""
+		Initialize a Radio Widget.
+		.
+		"group" identifies the group that this Radio is a member of. Only one Radio in
+		a group may be selected at a time.
+
+		"text" is the text to show on the associated label.
+		"""
+		self.group = group
+		if group not in Radio._groups: Radio._groups[group] = []
+		Radio._groups[group].append(self)
+		Widget.__init__(self, **kwargs)
+		self._label = Label(text, **kwargs)
+
+
+	def __getattr__(self, varname):
+		if varname == "text":
+			return self._label.text
+		return super(Radio, self).__getattr__(varname)
+
+
+	def get_initial_rect(self):
+		"""
+		Determine the minimum space necessary for this element and its' contained elements.
+		Returns Rect
+		"""
+		self._circle_rect = Rect(0, 0, self.diameter, self.diameter)
+		self._circle_boundary = self._circle_rect.inflate(self.padding_left, self.padding_top + self.padding_bottom)
+		self._circle_boundary.topleft = 0, 0
+		self._label_rect = self._label.get_initial_rect()
+		self._label_rect.left = self._circle_boundary.width
+		self.rect = self._circle_boundary.union(self._label_rect)
+		self._label_rect.centery = self.rect.centery
+		self._circle_boundary.centery = self.rect.centery
+		self._circle_rect.center = self._circle_boundary.center
+		return self.rect
+
+
+	def get_surface(self):
+		"""
+		Returns a Surface to use as this element's background, decorated with whichever effect function
+		is set on this widget having been applied.
+		"""
+		surface = Surface(self.rect.size)
+		surface.fill(self.current_background_color())
+
+		color = Color(*self.current_background_color())
+		highlight = color.correct_gamma(2)
+		shadow = color.correct_gamma(0.5)
+		arc(surface, shadow, self._circle_rect, RADIANS_TOPRIGHT, RADIANS_BOTTOM_LEFT, self.bevel_depth)
+		arc(surface, highlight, self._circle_rect, RADIANS_BOTTOM_LEFT, RADIANS_TOPRIGHT, self.bevel_depth)
+
+		if self.selected:
+			circle(surface, self.dot_color, self._circle_rect.center, self.dot_radius)
+
+		for att in ["disabled", "focused", "hovering"]:
+			setattr(self._label, att, getattr(self, att))
+		surface.blit(self._label.get_surface(), self._label_rect.topleft)
+		return surface
+
+
+	def click(self, pos):
+		"""
+		Click pseudo-event.
+		"""
+		for radio in Radio._groups[self.group]: radio.selected = False
+		self.selected = True
+		if callable(self.click_handler): self.click_handler(self)
+
+
+	def __str__(self):
+		return 'Radio "%s" in group "%s"  x:%d y:%d  w:%d h:%d' % (
+			self.text, self.group,
+			self.rect.left, self.rect.top, self.rect.width, self.rect.height
+		)
+
+
+
 
 class Dialog(VerticalLayout):
 
@@ -1263,6 +1357,10 @@ if __name__ == '__main__':
 		dialog = Dialog(
 			Textbox("Input one and a two", align=ALIGN_LEFT, width=360),
 			Button("Bottom Button", padding=22, click_handler=click_handler),
+			HorizontalLayout(
+				Radio("group1", "Option 1", align=ALIGN_RIGHT, click_handler=click_handler),
+				Radio("group1", "Option 2", align=ALIGN_LEFT, click_handler=click_handler)
+			),
 			status_label
 		)
 
