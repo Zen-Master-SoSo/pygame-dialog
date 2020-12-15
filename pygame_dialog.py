@@ -32,6 +32,9 @@ class Layout:
 	Base class of HorizontalLayout, VerticalLayout, and GridLayout.
 	"""
 
+	rect	= None
+
+
 	def get_initial_rect(self):
 		"""
 		Determine the minimum space necessary for this element and its' contained elements.
@@ -116,9 +119,9 @@ class Layout:
 
 
 	def __str__(self):
-		return "%s  x:%d y:%d  w:%d h:%d" % (
+		return "%s (%d x %d) @ (%d, %d)" % (
 			self.__class__.__name__,
-			self.rect.left, self.rect.top, self.rect.width, self.rect.height
+			self.rect.width, self.rect.height, self.rect.left, self.rect.top
 		)
 
 
@@ -127,6 +130,7 @@ class GridLayout(Layout):
 	"""
 	A container for other elements, including layouts and widgets, which arranges them in a grid.
 	"""
+
 
 	def __init__(self, *args):
 		self.rows = []
@@ -278,6 +282,7 @@ class LinearLayout(Layout):
 	Abstract base class of VerticalLayout and HorizontalLayout.
 	Do not subclass this class. Use either VerticalLayout or HorizontalLayout.
 	"""
+
 
 	def __init__(self, *args):
 		self.elements = []
@@ -540,6 +545,9 @@ class Widget:
 		elif varname == "effect":
 			# Set the effect_func to the function identified by the string "effect":
 			self.effect_func = getattr(self, value)
+		elif varname == "enabled":
+			varname = "disabled"
+			value = not value
 		# Set "dirty" only when a property changes:
 		if varname != "dirty" and (varname not in self.__dict__ or self.__dict__[varname] != value):
 			self.__dict__["dirty"] = True
@@ -698,11 +706,19 @@ class Widget:
 
 
 	def __str__(self):
-		return '%s "%s"  x:%d y:%d  w:%d h:%d' % (
+		return '%s "%s"  (%d x %d) @ (%d, %d)' % (
 			self.__class__.__name__,
 			self.text,
-			self.rect.left, self.rect.top, self.rect.width, self.rect.height
+			self.rect.width, self.rect.height, self.rect.left, self.rect.top
 		)
+
+
+	def dump(self, indent=0):
+		"""
+		Print this widget's __str__(), formatted for debugging.
+		"""
+		print('  ' * indent + self.__str__())
+
 
 
 
@@ -761,13 +777,6 @@ class TextWidget(Widget):
 		surface = Widget.get_surface(self)
 		surface.blit(rendered_text, self.text_rect)
 		return surface
-
-
-	def dump(self, indent=0):
-		"""
-		Print this widget's __str__(), formatted for debugging.
-		"""
-		print('  ' * indent + self.__str__())
 
 
 
@@ -985,7 +994,7 @@ class Textbox(TextWidget):
 		"""
 		Determines the cursor position of the given absolute x coordinate.
 		"""
-		widget_x = abs_x - self.rect.left - self.text_rect.left
+		widget_x = abs_x - self.rect.left
 		start = 0
 		end = len(self.text)
 		while start <= end:
@@ -1004,6 +1013,7 @@ class Textbox(TextWidget):
 class Radio(Widget):
 
 	selected		= False
+	value			= None				# (optional) value assigned to this Radio
 	diameter		= 30				# Outside diameter of the radio circle
 	dot_color		= (160, 160, 160)	# Color of the inner circle rendered when selected
 	dot_radius		= 8					# Radius of the inner circle rendered when selected
@@ -1030,8 +1040,8 @@ class Radio(Widget):
 	@classmethod
 	def selected_element(cls, group):
 		"""
-		Returns the Radio instance with the given "group" id which is selected.
-		Returns none if none are selected.
+		Returns the selected Radio instance having the given "group" id.
+		Returns none if no Radio in the given group is selected.
 		"""
 		if group in Radio._groups:
 			for radio in Radio._groups[group]:
@@ -1039,8 +1049,35 @@ class Radio(Widget):
 		return None
 
 
-	def __getattr__(self, varname):
+	@classmethod
+	def selected_value(cls, group):
+		"""
+		Returns the "value" attribute of the selected Radio instance having the given "group" id.
+		If the Radio widget's value is "None", returns the "text" attribute of the Radio's label.
+		Returns none if no Radio in the given group is selected.
+		"""
+		radio = Radio.selected_element(group)
+		if radio is None: return None
+		return radio.text if radio.value is None else radio.value
+
+
+	def __setattr__(self, varname, value):
+		"""
+		Delegate the "text" attribute to the label contained in this Radio widget.
+		"""
 		if varname == "text":
+			self._label.text = value
+		else:
+			super(Radio, self).__setattr__(varname, value)
+
+
+	def __getattr__(self, varname):
+		"""
+		Delegate the "text" attribute to the label contained in this Radio widget.
+		"""
+		if varname == "text":
+			return self._label.text
+		if varname == "value" and self.__dict__["value"] is None:
 			return self._label.text
 		return super(Radio, self).__getattr__(varname)
 
@@ -1095,10 +1132,11 @@ class Radio(Widget):
 
 
 	def __str__(self):
-		return 'Radio "%s" in group "%s"  x:%d y:%d  w:%d h:%d' % (
-			self.text, self.group,
-			self.rect.left, self.rect.top, self.rect.width, self.rect.height
+		return 'Radio ["%s" group] "%s" (%d x %d) @ (%d, %d)' % (
+			self.group, self.text,
+			self.rect.width, self.rect.height, self.rect.left, self.rect.top
 		)
+
 
 
 
@@ -1325,6 +1363,18 @@ class Dialog(VerticalLayout):
 		self.__run_loop = False
 
 
+	def dump(self, indent=0):
+		"""
+		Print this layout's element tree for debugging.
+		"""
+		if self.rect is None:
+			self.get_initial_rect()
+			self.justify_elements()
+			self.position_rects()
+		super(Dialog, self).dump(indent)
+
+
+
 
 
 if __name__ == '__main__':
@@ -1342,6 +1392,7 @@ if __name__ == '__main__':
 		print(elem.__str__())
 		if isinstance(elem, Radio):
 			print("Selected: %s" % Radio.selected_element(elem.group))
+			print("Value: %s" % Radio.selected_value(elem.group))
 
 	status_label = Label("Status label", font_size=22)
 
@@ -1369,11 +1420,11 @@ if __name__ == '__main__':
 
 	else:
 		dialog = Dialog(
-			Textbox("Input one and a two", align=ALIGN_LEFT, width=360),
+			Textbox("Input one and a two", align=ALIGN_CENTER, width=360),
 			Button("Bottom Button", padding=22, click_handler=click_handler),
 			HorizontalLayout(
 				Radio("group1", "Option 1", align=ALIGN_RIGHT, click_handler=click_handler),
-				Radio("group1", "Option 2", align=ALIGN_LEFT, click_handler=click_handler)
+				Radio("group1", "Option 2", value="SET_VALUE", align=ALIGN_LEFT, click_handler=click_handler)
 			),
 			status_label
 		)
@@ -1385,18 +1436,18 @@ if __name__ == '__main__':
 
 	if options.dump:
 
-		print("intial rects:")
+		print("\nIntial rects:")
 		dialog.get_initial_rect()
 		dialog.dump()
 		print
 
 		dialog.justify_elements()
-		print("after growing rects to fit available space:")
+		print("\nAfter growing rects to fit available space:")
 		dialog.dump()
 		print
 
 		dialog.position_rects()
-		print("after positioning:")
+		print("\nAfter positioning:")
 		dialog.dump()
 
 	else:

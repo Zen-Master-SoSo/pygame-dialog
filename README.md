@@ -102,9 +102,14 @@ constructor.
 Typical Radio button class. You pass a "group" id to the constructor, and the
 "selected" attribute of all the Radio instances with that same group are
 mutually exclusive. Generates "click events" just like a button, so you can
-modify other parts of the dialog when selection changes. You can also query
-which Radio in a group is selected using the "Radio.selected_element" class
-method.
+modify other parts of the dialog when selection changes.
+
+You can query which Radio in a group is selected using the
+Radio.selected_element(<group>) class method. Get the value of the selected
+Radio in a group using the Radio.selected_value(<group>) class method.
+
+The "value" attribute of a Radio is optional; if no "value" is set, "value"
+returns the text of the Radio's label.
 
 
 ### Widget attributes:
